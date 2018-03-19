@@ -38,16 +38,4 @@ const winstonTransportSettings = {
 
 const logger = new winston.Logger(winstonTransportSettings);
 
-// All Log messages should include standard correlation data and other turbot
-// convenience fields.
-logger.log = function() {
-  var args = arguments;
-  // The log function has format log(<level>, <msg>, <object>)
-  if (args[2]) args[3] = args[2];
-  args[2] = {
-    foo: "bar"
-  };
-  winston.Logger.prototype.log.apply(this, args);
-};
-
 module.exports = logger;
