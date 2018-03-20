@@ -1,19 +1,16 @@
 const assert = require("chai").assert;
 const log = require("..");
-var stdout = require("test-console").stdout;
-//require("mocha-sinon");
+const testConsole = require("test-console");
 
 describe("turbot-log", function() {
   describe("log info by default", function() {
     let output, outputLines;
     let msg = "hello";
     before(function() {
-      outputLines = stdout.inspectSync(function() {
+      outputLines = testConsole.inspectSync(function() {
         log.info(msg);
       });
-      if (outputLines instanceof Array) {
-        output = JSON.parse(outputLines[0]);
-      }
+      output = JSON.parse(outputLines[0]);
     });
     it("logged only one message", function() {
       assert.lengthOf(outputLines, 1);
@@ -32,14 +29,14 @@ describe("turbot-log", function() {
   // TODO - Test correlationId is included
   // TODO - Test correlationId changes with each request
   // TODO - Test extra metadata
-  // TODO - Test error messages are on stdout (not stderr)
+  // NOTE - error messages are on stderr (not stdout)
   // TODO - Test log level can change per request
 
   describe("hide debug if at info level", function() {
     let outputLines;
     let msg = "hello";
     before(function() {
-      outputLines = stdout.inspectSync(function() {
+      outputLines = testConsole.stdout.inspectSync(function() {
         log.debug(msg);
       });
     });
