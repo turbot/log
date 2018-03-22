@@ -12,7 +12,12 @@ const trace = format(function(info, opts) {
 });
 
 const sanitize = format(function(info, opts) {
-  return utils.data.sanitize(info, { clone: false });
+  // Sanitize the data, stripping any sensitive information. Our priorities
+  // are:
+  // 1. Hide sensitive data.
+  // 2. Break cyclic loops - JSON logging won't work with them.
+  // 3. Avoid mutating the info input (if possible).
+  return utils.data.sanitize(info, { clone: false, breakCircular: true });
 });
 
 const logger = winston.createLogger({

@@ -96,6 +96,42 @@ describe("turbot-log", function() {
     });
   });
 
+  describe("Hide sensitive data", function() {
+    let outputLines, output;
+    let data = {
+      host: "localhost",
+      user: "turbot",
+      $password: "secret"
+    };
+    before(function() {
+      outputLines = testConsole.stdout.inspectSync(function() {
+        log.info("here's the data!", data);
+      });
+      output = JSON.parse(outputLines[0]);
+    });
+    it("host is unchanged (not <sensitive>)", function() {
+      assert.equal(output.host, data.host);
+    });
+    it("$password is <sensitive>", function() {
+      assert.equal(output.$password, "<sensitive>");
+    });
+  });
+
+  describe("circular data is logged", function() {
+    let input, output, outputLines;
+    before(function() {
+      input = { one: 1, two: 2 };
+      input.cycle = input;
+      outputLines = testConsole.stdout.inspectSync(function() {
+        log.info("I have cyclic data", input);
+      });
+      output = JSON.parse(outputLines[0]);
+    });
+    it("survived intact through both sanitize and JSON.stringify", function() {
+      assert.equal(output.one, 1);
+    });
+  });
+
   xdescribe("TODO", function() {
     it("Set log level per trace.logLevel", function() {});
     it("Logs but does not absorb exceptions", function() {

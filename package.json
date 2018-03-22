@@ -11,7 +11,10 @@
     "test": "mocha"
   },
   "eslintConfig": {
-    "extends": ["plugin:prettier/recommended", "eslint:recommended"],
+    "extends": [
+      "plugin:prettier/recommended",
+      "eslint:recommended"
+    ],
     "env": {
       "es6": true,
       "node": true
