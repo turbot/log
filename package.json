@@ -40,9 +40,8 @@
     "turbot-errors": "git+ssh://git@github.com:turbotio/turbot-errors.git"
   },
   "dependencies": {
-    "serialize-error": "^2.1.0",
+    "serialize-error": "2.1.0",
     "turbot-config": "git+ssh://git@github.com:turbotio/turbot-config.git",
-    "turbot-utils": "git+ssh://git@github.com:turbotio/turbot-utils.git",
-    "winston": "3.0.0-rc3"
+    "turbot-utils": "git+ssh://git@github.com:turbotio/turbot-utils.git"
   }
 }

@@ -1,5 +1,7 @@
 # turbot-log
 
+## Overview
+
 Logs in Turbot are expected to be:
 * JSON format
 * Written to stdout
@@ -13,11 +15,10 @@ time view of processes in the UI. This is great, but obviously fairly heavy for
 logging and will not work well in a more distributed application architecture.
 
 For v5, our plan is to:
-1. Log using Winston.
-2. Use the console.log transport.
-3. Route the output to AWS CloudWatch Logs.
-4. Subscribe events from CloudWatch Logs to Kinesis streams.
-5. Use Lambda to process log events.
+1. Log to the console.
+2. Route the output to AWS CloudWatch Logs.
+3. Subscribe events from CloudWatch Logs to Kinesis streams.
+4. Use Lambda to process log events.
 
 (Note - GovCloud does not seem to support CloudWatch Logs subscriptions, so we
 cannot automatically route data to a Kinesis stream. Instead, we'll add a
@@ -32,10 +33,13 @@ require in a simple way. Imagine log entries for:
 * Resources to create
 * Notifications to send
 
+## Why write a logging package?
 
+We'd prefer to use winston or bunyan or similar, but found all of those packages
+unsuitable for our simple requirements. For example, with winston:
 
-Why Winston?
-It's slow - 
-But powerful, and probably better than Bunyan - https://npmcompare.com/compare/bunyan,winston
-
-
+1. The logging level cannot be changed per request.
+2. The metadata object cannot be replaced, but must be modified inline. After
+   many hours and unit tests I stopped pursuing all the edge cases of error
+   objects (hidden fields), circular references, circular references in errors,
+   etc. It was just easier to write a new logging library :-(.
