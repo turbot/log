@@ -7,7 +7,7 @@ const utils = require("turbot-utils");
 //   https://en.wikipedia.org/wiki/Syslog#Severity_level
 //   https://support.solarwinds.com/Success_Center/Log_Event_Manager_(LEM)/Syslog_Severity_levels
 const levels = {
-  emerg: { value: 0, severity: "Emergency", description: "Final entry in a fatal, panic condition." },
+  emer: { value: 0, severity: "Emergency", description: "Final entry in a fatal, panic condition." },
   alert: { value: 1, severity: "Alert", description: "A condition that should be corrected immediately." },
   crit: { value: 2, sevurity: "Critical", description: "Critical conditions, such as hard device errors." },
   err: { value: 3, severity: "Error", description: "Error messages. Review and remediation required." },
@@ -52,7 +52,8 @@ const handler = function(level) {
       logEntry.trace = trace;
     }
     logEntry = utils.data.sanitize(logEntry, { clone: false, breakCircular: true });
-    console.log(JSON.stringify(logEntry));
+    const method = (levels[level].value <= levels.err.value) ? 'error' : 'log';
+    console[method](JSON.stringify(logEntry));
     return logEntry;
   };
 };

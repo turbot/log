@@ -43,6 +43,7 @@ describe("turbot-log", function() {
   });
 
   describe("Add trace data if available", function() {
+    let output, outputLines;
     let tmpEnv;
     let trace = {
       correlationId: "abcd1234"
@@ -55,9 +56,9 @@ describe("turbot-log", function() {
     });
 
     after(function() {
-      for (k in tmpEnv) {
+      for (const k in tmpEnv) {
         if (tmpEnv[k]) {
-          process.env[k] = tmpEnv;
+          process.env[k] = tmpEnv[k];
         } else {
           delete process.env[k];
         }
@@ -141,8 +142,8 @@ describe("turbot-log", function() {
       } catch (e) {
         err = errors.internal("my-wrap", e);
       }
-      outputLines = testConsole.stdout.inspectSync(function() {
-        log.info("I have an error", err);
+      outputLines = testConsole.stderr.inspectSync(function() {
+        log.err("I am an error", err);
       });
       output = JSON.parse(outputLines[0]);
     });
@@ -154,6 +155,61 @@ describe("turbot-log", function() {
     it("has message and wrapper", function() {
       assert.include(output.message, "my-error");
       assert.include(output.message, "my-wrap");
+    });
+  });
+
+  describe("Console standard streams per level", function() {
+    var tmpEnv;
+
+    before(function() {
+      tmpEnv = _.pick(process.env, "TURBOT_CONFIG_ENV");
+      process.env.TURBOT_CONFIG_ENV = JSON.stringify({ log: { level: "debug" } });
+      tconf.$load();
+    });
+
+    after(function() {
+      for (const k in tmpEnv) {
+        if (tmpEnv[k]) {
+          process.env[k] = tmpEnv[k];
+        } else {
+          delete process.env[k];
+        }
+      }
+      tconf.$load();
+    });
+
+    const tests = [
+      ["emer", "stderr"],
+      ["alert", "stderr"],
+      ["crit", "stderr"],
+      ["err", "stderr"],
+      ["warning", "stdout"],
+      ["notice", "stdout"],
+      ["info", "stdout"],
+      ["debug", "stdout"]
+    ];
+
+    tests.forEach(function(test) {
+      describe(test[0], function() {
+        var stdoutLines, stderrLines;
+
+        before(function() {
+          stderrLines = testConsole.stderr.inspectSync(function() {
+            stdoutLines = testConsole.stdout.inspectSync(function() {
+              log[test[0]]("Do I appear in stdout or stderr?");
+            });
+          });
+        });
+
+        after(function() {});
+
+        it((test[1] == "stderr" ? "does not " : "") + "log to stdout", function() {
+          assert.lengthOf(stdoutLines, test[1] == "stdout" ? 1 : 0);
+        });
+        it((test[1] == "stdout" ? "does not " : "") + "log to stderr", function() {
+          assert.lengthOf(stderrLines, test[1] == "stderr" ? 1 : 0);
+        });
+      });
     });
   });
 
