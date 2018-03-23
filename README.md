@@ -17,7 +17,7 @@ For v5, our plan is to:
 2. Use the console.log transport.
 3. Route the output to AWS CloudWatch Logs.
 4. Subscribe events from CloudWatch Logs to Kinesis streams.
-5. Use Lambda to process log evvents.
+5. Use Lambda to process log events.
 
 (Note - GovCloud does not seem to support CloudWatch Logs subscriptions, so we
 cannot automatically route data to a Kinesis stream. Instead, we'll add a

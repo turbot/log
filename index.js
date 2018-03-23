@@ -2,38 +2,98 @@ const serializeError = require("serialize-error");
 const tconf = require("turbot-config");
 const utils = require("turbot-utils");
 
-// syslog levels as defined by:
+// Syslog levels are always specifically defined by the application. Turbot's
+// definitions are heavily inspired by:
+//   https://support.solarwinds.com/Success_Center/Log_Event_Manager_(LEM)/Syslog_Severity_levels
 //   http://pubs.opengroup.org/onlinepubs/009695399/functions/syslog.html
 //   https://en.wikipedia.org/wiki/Syslog#Severity_level
-//   https://support.solarwinds.com/Success_Center/Log_Event_Manager_(LEM)/Syslog_Severity_levels
-const levels = {
-  emer: { value: 0, severity: "Emergency", description: "Final entry in a fatal, panic condition." },
-  alert: { value: 1, severity: "Alert", description: "A condition that should be corrected immediately." },
-  crit: { value: 2, sevurity: "Critical", description: "Critical conditions, such as hard device errors." },
-  err: { value: 3, severity: "Error", description: "Error messages. Review and remediation required." },
-  warning: { value: 4, severity: "Warning", description: "Warning messages. Review recommended." },
-  notice: { value: 5, severity: "Notice", description: "Significant, but normal, events such as automated actions." },
-  info: { value: 6, severity: "Informational", description: "Information about decisions and interim data." },
-  debug: { value: 7, severity: "Debug", description: "Debug messages used in development only." }
+const LEVELS = {
+  emergency: {
+    value: 0,
+    name: "emergency",
+    aliases: ["emerg"],
+    severity: "Emergency",
+    description: "Turbot is unavailable and automatic recovery is unlikely."
+  },
+
+  alert: {
+    value: 1,
+    id: "alert",
+    severity: "Alert",
+    description: "Alert from a key component or dependency. Turbot is unusable, but may automatically recover."
+  },
+
+  critical: {
+    value: 2,
+    id: "critical",
+    aliases: ["crit"],
+    severity: "Critical",
+    description: "Critical conditions. Turbot may be unavailable or have severely degraded performance."
+  },
+
+  error: {
+    value: 3,
+    id: "error",
+    aliases: ["err"],
+    severity: "Error",
+    description: "Error significant to an action, but not critical to Turbot. Review and remediation required."
+  },
+
+  warning: {
+    value: 4,
+    id: "warning",
+    severity: "Warning",
+    description: "Warning messages. An error may occur if action is not taken. Review recommended."
+  },
+
+  notice: {
+    value: 5,
+    id: "notice",
+    severity: "Notice",
+    description: "Significant, but normal, events such as automated actions."
+  },
+
+  info: {
+    value: 6,
+    id: "info",
+    severity: "Informational",
+    description: "Information about decisions and interim data."
+  },
+
+  debug: {
+    value: 7,
+    id: "debug",
+    severity: "Debug",
+    description: "Debug messages used in development only."
+  }
 };
 
-const handler = function(level) {
+const handler = function(level, levelData) {
   return function(reason = {}, data = {}) {
+    // Don't log if the message is at a more verbose level than desired.
+    // Default to error.
     const targetLogLevel = tconf.get(["log", "level"], "info");
-    if (levels[level].value > levels[targetLogLevel].value) {
+    if (levelData.value > LEVELS[targetLogLevel].value) {
       return;
     }
+
     if (typeof reason != "string") {
       data = reason;
       reason = null;
     }
+
+    // Errors in node are ugly. They have hidden fields, but are highly useful
+    // in logs. Detect direct passing of error objects and convert them to
+    // actual loggable objects - a convenience for the caller and avoids those
+    // got log from production by the error details are empty (doh!) moments.
     let logEntry;
     if (data instanceof Error) {
       logEntry = serializeError(data);
     } else {
       logEntry = data;
     }
-    // Reason is added to the message if provided.
+
+    // Add reason to the message if provided.
     if (reason) {
       if (logEntry.message) {
         logEntry.message += ": " + reason;
@@ -41,31 +101,48 @@ const handler = function(level) {
         logEntry.message = reason;
       }
     }
+
+    // Always record basic log entry details.
     if (!logEntry.level) {
-      logEntry.level = level;
+      logEntry.level = levelData.id;
     }
     if (!logEntry.timestamp) {
       logEntry.timestamp = new Date();
     }
+
+    // Add Turbot tracing information to the log if it's available.
     const trace = tconf.get("trace");
     if (trace) {
       logEntry.trace = trace;
     }
+
+    // Ensure that the data is sanitized - in particular - sensitive data
+    // should always be hidden.
     logEntry = utils.data.sanitize(logEntry, { clone: false, breakCircular: true });
-    const method = (levels[level].value <= levels.err.value) ? 'error' : 'log';
+
+    // Turbot only logs messages critical to Turbot to stderr. All others -
+    // including errors - are logged to stdout. So, stderr can be used for
+    // Turbot system errors, while stdout (which is more easily suppressed) is
+    // used for errors and information about capabilities inside the Turbot
+    // application.
+    // For example, Turbot not working because we can't reach a database is
+    // critical (stderr) while Turbot control failing because of a bad
+    // configuration is error (stdout).
+    const method = levelData.value <= LEVELS.critical.value ? "error" : "log";
     console[method](JSON.stringify(logEntry));
+
     return logEntry;
   };
 };
 
+exports.levels = LEVELS;
 
-exports.levels = levels;
-
-for (const level in levels) {
-  exports[level] = handler(level);
+for (const level in LEVELS) {
+  exports[level] = handler(level, LEVELS[level]);
+  for (const alias of LEVELS[level].aliases || []) {
+    exports[alias] = handler(alias, LEVELS[level]);
+  }
 }
-
-
 
 /*
 

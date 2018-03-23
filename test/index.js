@@ -142,8 +142,8 @@ describe("turbot-log", function() {
       } catch (e) {
         err = errors.internal("my-wrap", e);
       }
-      outputLines = testConsole.stderr.inspectSync(function() {
-        log.err("I am an error", err);
+      outputLines = testConsole.stdout.inspectSync(function() {
+        log.error("I am an error", err);
       });
       output = JSON.parse(outputLines[0]);
     });
@@ -179,10 +179,10 @@ describe("turbot-log", function() {
     });
 
     const tests = [
-      ["emer", "stderr"],
+      ["emergency", "stderr"],
       ["alert", "stderr"],
-      ["crit", "stderr"],
-      ["err", "stderr"],
+      ["critical", "stderr"],
+      ["error", "stdout"],
       ["warning", "stdout"],
       ["notice", "stdout"],
       ["info", "stdout"],
@@ -201,13 +201,40 @@ describe("turbot-log", function() {
           });
         });
 
-        after(function() {});
-
         it((test[1] == "stderr" ? "does not " : "") + "log to stdout", function() {
           assert.lengthOf(stdoutLines, test[1] == "stdout" ? 1 : 0);
         });
         it((test[1] == "stdout" ? "does not " : "") + "log to stderr", function() {
           assert.lengthOf(stderrLines, test[1] == "stderr" ? 1 : 0);
+        });
+      });
+    });
+  });
+
+  describe("Logging to an alias", function() {
+    const tests = [["error", "err"]];
+
+    tests.forEach(function(test) {
+      describe(`${test[1]} -> ${test[0]}`, function() {
+        var stdoutLines, stderrLines;
+
+        before(function() {
+          stdoutLines = testConsole.stdout.inspectSync(function() {
+            log[test[0]](test[0]);
+            log[test[1]](test[1]);
+          });
+        });
+
+        it(`log.${test[0]} logs with level ${test[0]}`, function() {
+          const entry = JSON.parse(stdoutLines[0]);
+          assert.equal(entry.level, test[0]);
+          assert.equal(entry.message, test[0]);
+        });
+
+        it(`log.${test[1]} alias logs with level ${test[0]}`, function() {
+          const entry = JSON.parse(stdoutLines[1]);
+          assert.equal(entry.level, test[0]);
+          assert.equal(entry.message, test[1]);
         });
       });
     });
