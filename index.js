@@ -6,7 +6,7 @@ const utils = require("turbot-utils");
 //   http://pubs.opengroup.org/onlinepubs/009695399/functions/syslog.html
 //   https://en.wikipedia.org/wiki/Syslog#Severity_level
 //   https://support.solarwinds.com/Success_Center/Log_Event_Manager_(LEM)/Syslog_Severity_levels
-levels = {
+const levels = {
   emerg: { value: 0, severity: "Emergency", description: "Final entry in a fatal, panic condition." },
   alert: { value: 1, severity: "Alert", description: "A condition that should be corrected immediately." },
   crit: { value: 2, sevurity: "Critical", description: "Critical conditions, such as hard device errors." },
@@ -57,12 +57,14 @@ const handler = function(level) {
   };
 };
 
-module.exports = {
-  debug: handler("debug"),
-  error: handler("error"),
-  info: handler("info"),
-  levels: levels
-};
+
+exports.levels = levels;
+
+for (const level in levels) {
+  exports[level] = handler(level);
+}
+
+
 
 /*
 
