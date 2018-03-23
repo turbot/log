@@ -1,5 +1,6 @@
 const _ = require("lodash");
 const assert = require("chai").assert;
+const errors = require("turbot-errors");
 const log = require("..");
 const tconf = require("turbot-config");
 const testConsole = require("test-console");
@@ -129,6 +130,30 @@ describe("turbot-log", function() {
     });
     it("survived intact through both sanitize and JSON.stringify", function() {
       assert.equal(output.one, 1);
+    });
+  });
+
+  describe("Error objects", function() {
+    let err, output, outputLines;
+    before(function() {
+      try {
+        throw new Error("my-error");
+      } catch (e) {
+        err = errors.internal("my-wrap", e);
+      }
+      outputLines = testConsole.stdout.inspectSync(function() {
+        log.info("I have an error", err);
+      });
+      output = JSON.parse(outputLines[0]);
+    });
+    it("has err object", function() {
+      assert.exists(output.name);
+      assert.exists(output.message);
+      assert.exists(output.stack);
+    });
+    it("has message and wrapper", function() {
+      assert.include(output.message, "my-error");
+      assert.include(output.message, "my-wrap");
     });
   });
 

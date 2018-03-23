@@ -2,6 +2,18 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "main",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/index.js"
+    },
+    {
+      "name": "run",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/run.js"
+    },
+    {
       "name": "test",
       "type": "node",
       "request": "launch",

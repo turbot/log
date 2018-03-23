@@ -1,3 +1,72 @@
+const serializeError = require("serialize-error");
+const tconf = require("turbot-config");
+const utils = require("turbot-utils");
+
+// syslog levels as defined by:
+//   http://pubs.opengroup.org/onlinepubs/009695399/functions/syslog.html
+//   https://en.wikipedia.org/wiki/Syslog#Severity_level
+//   https://support.solarwinds.com/Success_Center/Log_Event_Manager_(LEM)/Syslog_Severity_levels
+levels = {
+  emerg: { value: 0, severity: "Emergency", description: "Final entry in a fatal, panic condition." },
+  alert: { value: 1, severity: "Alert", description: "A condition that should be corrected immediately." },
+  crit: { value: 2, sevurity: "Critical", description: "Critical conditions, such as hard device errors." },
+  err: { value: 3, severity: "Error", description: "Error messages. Review and remediation required." },
+  warning: { value: 4, severity: "Warning", description: "Warning messages. Review recommended." },
+  notice: { value: 5, severity: "Notice", description: "Significant, but normal, events such as automated actions." },
+  info: { value: 6, severity: "Informational", description: "Information about decisions and interim data." },
+  debug: { value: 7, severity: "Debug", description: "Debug messages used in development only." }
+};
+
+const handler = function(level) {
+  return function(reason = {}, data = {}) {
+    const targetLogLevel = tconf.get(["log", "level"], "info");
+    if (levels[level].value > levels[targetLogLevel].value) {
+      return;
+    }
+    if (typeof reason != "string") {
+      data = reason;
+      reason = null;
+    }
+    let logEntry;
+    if (data instanceof Error) {
+      logEntry = serializeError(data);
+    } else {
+      logEntry = data;
+    }
+    // Reason is added to the message if provided.
+    if (reason) {
+      if (logEntry.message) {
+        logEntry.message += ": " + reason;
+      } else {
+        logEntry.message = reason;
+      }
+    }
+    if (!logEntry.level) {
+      logEntry.level = level;
+    }
+    if (!logEntry.timestamp) {
+      logEntry.timestamp = new Date();
+    }
+    const trace = tconf.get("trace");
+    if (trace) {
+      logEntry.trace = trace;
+    }
+    logEntry = utils.data.sanitize(logEntry, { clone: false, breakCircular: true });
+    console.log(JSON.stringify(logEntry));
+    return logEntry;
+  };
+};
+
+module.exports = {
+  debug: handler("debug"),
+  error: handler("error"),
+  info: handler("info"),
+  levels: levels
+};
+
+/*
+
+const serializeError = require("serialize-error");
 const tconf = require("turbot-config");
 const utils = require("turbot-utils");
 const winston = require("winston");
@@ -45,4 +114,28 @@ const logger = winston.createLogger({
   ]
 });
 
+logger._log = logger.log;
+logger.log = function(type, message, data) {
+  if (type instanceof Error) {
+    type = serializeError(type);
+  }
+  if (message instanceof Error) {
+    message = serializeError(message);
+  }
+  if (data instanceof Error) {
+    data = serializeError(data);
+  }
+  console.log("----------");
+  console.log("log: " + type);
+  console.log("log: " + message);
+  console.log(data);
+  console.log("----------");
+  logger._log(type, message, data);
+};
+logger.info = function(message, data) {
+  logger.log("info", message, data);
+};
+
 module.exports = logger;
+
+*/

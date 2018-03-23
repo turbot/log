@@ -36,9 +36,11 @@
     "mocha-sinon": "2.0.0",
     "prettier": "1.11.1",
     "sinon": "4.4.6",
-    "test-console": "1.1.0"
+    "test-console": "1.1.0",
+    "turbot-errors": "git+ssh://git@github.com:turbotio/turbot-errors.git"
   },
   "dependencies": {
+    "serialize-error": "^2.1.0",
     "turbot-config": "git+ssh://git@github.com:turbotio/turbot-config.git",
     "turbot-utils": "git+ssh://git@github.com:turbotio/turbot-utils.git",
     "winston": "3.0.0-rc3"
