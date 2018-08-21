@@ -1,8 +1,8 @@
 const _ = require("lodash");
 const assert = require("chai").assert;
-const errors = require("turbot-errors");
+const errors = require("@turbot/errors");
 const log = require("..");
-const tconf = require("turbot-config");
+const tconf = require("@turbot/config");
 const testConsole = require("test-console");
 
 describe("turbot-log", function() {
@@ -142,13 +142,18 @@ describe("turbot-log", function() {
       } catch (e) {
         err = errors.internal("my-wrap", e);
       }
+      console.log(err);
+      console.log(err.stack);
       outputLines = testConsole.stdout.inspectSync(function() {
         log.error("I am an error", err);
       });
       output = JSON.parse(outputLines[0]);
     });
     it("has err object", function() {
-      assert.exists(output.name);
+      console.log(output);
+      console.log(output.stack);
+      console.log(output.message);
+      //assert.exists(output.name);
       assert.exists(output.message);
       assert.exists(output.stack);
     });
@@ -216,7 +221,7 @@ describe("turbot-log", function() {
 
     tests.forEach(function(test) {
       describe(`${test[1]} -> ${test[0]}`, function() {
-        var stdoutLines, stderrLines;
+        var stdoutLines;
 
         before(function() {
           stdoutLines = testConsole.stdout.inspectSync(function() {

@@ -1,6 +1,12 @@
 const serializeError = require("serialize-error");
-const tconf = require("turbot-config");
-const utils = require("turbot-utils");
+const tconf = require("@turbot/config");
+const utils = require("@turbot/utils");
+
+/***
+ * This logger behaves weird if the data passed has a 'message' that's not meant to be a message, it's a convenient
+ * thing to add message in front of the message passed as parameters. (remove? we could not control what
+ * mod developers send to the the logger).
+ */
 
 // Syslog levels are always specifically defined by the application. Turbot's
 // definitions are heavily inspired by:
@@ -82,10 +88,9 @@ const handler = function(level, levelData) {
       reason = null;
     }
 
-    // Errors in node are ugly. They have hidden fields, but are highly useful
-    // in logs. Detect direct passing of error objects and convert them to
-    // actual loggable objects - a convenience for the caller and avoids those
-    // got log from production by the error details are empty (doh!) moments.
+    // Errors in node have hidden fields. I assume this is to ensure things
+    // like the stack trace don't get output and create security issues. In
+    // our case however, we want logs to show the full error details.
     let logEntry;
     if (data instanceof Error) {
       logEntry = serializeError(data);
