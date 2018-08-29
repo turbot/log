@@ -1,5 +1,5 @@
+const _ = require("lodash");
 const serializeError = require("serialize-error");
-const tconf = require("@turbot/config");
 const utils = require("@turbot/utils");
 
 /***
@@ -74,11 +74,28 @@ const LEVELS = {
   }
 };
 
+/**
+ * Environment variables:
+ * TURBOT_LOG_LEVEL
+ * TURBOT_TRACE_CONFIG
+ *
+ * @param {string} level Logging level, i.e. debug, info, warning, error
+ * @param {object} levelData Data to log
+ */
 const handler = function(level, levelData) {
-  return function(reason = {}, data = {}) {
+  return function(reason = {}, rawData = {}) {
+    // TODO: should we clone here? I sort of expected that my data is undisturbed when I call the log function
+    // so it's a bit of a surprised when we sanitize the real object
+    let data = _.cloneDeep(rawData);
+
     // Don't log if the message is at a more verbose level than desired.
     // Default to error.
-    const targetLogLevel = tconf.get(["log", "level"], "info");
+
+    let targetLogLevel = process.env.TURBOT_LOG_LEVEL;
+    if (!targetLogLevel) {
+      targetLogLevel = "info";
+    }
+
     if (levelData.value > LEVELS[targetLogLevel].value) {
       return;
     }
@@ -88,19 +105,22 @@ const handler = function(level, levelData) {
       reason = null;
     }
 
-    // Errors in node have hidden fields. I assume this is to ensure things
-    // like the stack trace don't get output and create security issues. In
-    // our case however, we want logs to show the full error details.
+    // Errors in node are ugly. They have hidden fields, but are highly useful
+    // in logs. Detect direct passing of error objects and convert them to
+    // actual loggable objects - a convenience for the caller and avoids those
+    // got log from production by the error details are empty (doh!) moments.
     let logEntry;
-    if (data instanceof Error) {
-      logEntry = serializeError(data);
+
+    // Note because we clone the data, it's no longer an instance of Error,
+    // so we need to test the original data passed in and serialize that one
+    if (rawData instanceof Error) {
+      logEntry = serializeError(rawData);
     } else {
       logEntry = data;
     }
-
     // Add reason to the message if provided.
     if (reason) {
-      if (logEntry.message) {
+      if (logEntry.message && _.isString(logEntry.message)) {
         logEntry.message += ": " + reason;
       } else {
         logEntry.message = reason;
@@ -116,9 +136,13 @@ const handler = function(level, levelData) {
     }
 
     // Add Turbot tracing information to the log if it's available.
-    const trace = tconf.get("trace");
+    const trace = process.env.TURBOT_TRACE_CONFIG;
     if (trace) {
-      logEntry.trace = trace;
+      try {
+        logEntry.trace = JSON.parse(trace);
+      } catch (e) {
+        console.error("Error parsing TURBOT_TRACE_CONFIG", trace);
+      }
     }
 
     // Ensure that the data is sanitized - in particular - sensitive data

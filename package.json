@@ -8,7 +8,8 @@
     "node": ">=6.0.0"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "nyc mocha",
+    "fast-teest": "mocha"
   },
   "eslintConfig": {
     "extends": [
@@ -33,7 +34,6 @@
   },
   "dependencies": {
     "serialize-error": "2.1.0",
-    "@turbot/config": "git+ssh://git@github.com:turbotio/config.git",
     "@turbot/errors": "git+ssh://git@github.com:turbotio/errors.git",
     "@turbot/utils": "git+ssh://git@github.com:turbotio/utils.git"
   },

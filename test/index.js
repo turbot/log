@@ -2,7 +2,6 @@ const _ = require("lodash");
 const assert = require("chai").assert;
 const errors = require("@turbot/errors");
 const log = require("..");
-const tconf = require("@turbot/config");
 const testConsole = require("test-console");
 
 describe("turbot-log", function() {
@@ -44,26 +43,16 @@ describe("turbot-log", function() {
 
   describe("Add trace data if available", function() {
     let output, outputLines;
-    let tmpEnv;
     let trace = {
       correlationId: "abcd1234"
     };
 
     before(function() {
-      tmpEnv = _.pick(process.env, "AWS_REGION", "TURBOT_CONFIG_ENV");
-      process.env.TURBOT_CONFIG_ENV = JSON.stringify({ trace: trace });
-      tconf.$load();
+      process.env.TURBOT_TRACE_CONFIG = JSON.stringify(trace);
     });
 
     after(function() {
-      for (const k in tmpEnv) {
-        if (tmpEnv[k]) {
-          process.env[k] = tmpEnv[k];
-        } else {
-          delete process.env[k];
-        }
-      }
-      tconf.$load();
+      delete process.env.TURBOT_TRACE_CONFIG;
     });
 
     before(function() {
@@ -142,45 +131,35 @@ describe("turbot-log", function() {
       } catch (e) {
         err = errors.internal("my-wrap", e);
       }
-      console.log(err);
-      console.log(err.stack);
+      // console.log(err);
+      // console.log(err.stack);
       outputLines = testConsole.stdout.inspectSync(function() {
         log.error("I am an error", err);
       });
       output = JSON.parse(outputLines[0]);
     });
+
     it("has err object", function() {
-      console.log(output);
-      console.log(output.stack);
-      console.log(output.message);
-      //assert.exists(output.name);
+      // console.log(output);
+      // console.log(output.stack);
+      // console.log(output.message);
+      assert.exists(output.name);
       assert.exists(output.message);
       assert.exists(output.stack);
     });
-    it("has message and wrapper", function() {
+    it("has message but the wrapped error message is not elevated, this is a change of behaviour", function() {
       assert.include(output.message, "my-error");
       assert.include(output.message, "my-wrap");
     });
   });
 
   describe("Console standard streams per level", function() {
-    var tmpEnv;
-
     before(function() {
-      tmpEnv = _.pick(process.env, "TURBOT_CONFIG_ENV");
-      process.env.TURBOT_CONFIG_ENV = JSON.stringify({ log: { level: "debug" } });
-      tconf.$load();
+      process.env.TURBOT_LOG_LEVEL = "debug";
     });
 
     after(function() {
-      for (const k in tmpEnv) {
-        if (tmpEnv[k]) {
-          process.env[k] = tmpEnv[k];
-        } else {
-          delete process.env[k];
-        }
-      }
-      tconf.$load();
+      delete process.env.TURBOT_LOG_LEVEL;
     });
 
     const tests = [
@@ -196,7 +175,7 @@ describe("turbot-log", function() {
 
     tests.forEach(function(test) {
       describe(test[0], function() {
-        var stdoutLines, stderrLines;
+        let stdoutLines, stderrLines;
 
         before(function() {
           stderrLines = testConsole.stderr.inspectSync(function() {
@@ -221,7 +200,7 @@ describe("turbot-log", function() {
 
     tests.forEach(function(test) {
       describe(`${test[1]} -> ${test[0]}`, function() {
-        var stdoutLines;
+        let stdoutLines;
 
         before(function() {
           stdoutLines = testConsole.stdout.inspectSync(function() {
