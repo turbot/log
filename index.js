@@ -147,7 +147,10 @@ const handler = function(level, levelData) {
 
     // Ensure that the data is sanitized - in particular - sensitive data
     // should always be hidden.
-    logEntry = utils.data.sanitize(logEntry, { clone: false, breakCircular: true });
+    logEntry = utils.data.sanitize(logEntry, {
+      clone: false,
+      breakCircular: true
+    });
 
     // Turbot only logs messages critical to Turbot to stderr. All others -
     // including errors - are logged to stdout. So, stderr can be used for
@@ -169,6 +172,7 @@ exports.levels = LEVELS;
 for (const level in LEVELS) {
   exports[level] = handler(level, LEVELS[level]);
   for (const alias of LEVELS[level].aliases || []) {
-    exports[alias] = handler(alias, LEVELS[level]);
+    // Add the alias as a pointer to the main function
+    exports[alias] = exports[level];
   }
 }
