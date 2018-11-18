@@ -84,10 +84,6 @@ const LEVELS = {
  */
 const handler = function(level, levelData) {
   return function(reason = {}, rawData = {}) {
-    // TODO: should we clone here? I sort of expected that my data is undisturbed when I call the log function
-    // so it's a bit of a surprised when we sanitize the real object
-    let data = _.cloneDeep(rawData);
-
     // Don't log if the message is at a more verbose level than desired.
     // Default to error.
 
@@ -101,7 +97,7 @@ const handler = function(level, levelData) {
     }
 
     if (typeof reason != "string") {
-      data = reason;
+      rawData = reason;
       reason = null;
     }
 
@@ -116,7 +112,9 @@ const handler = function(level, levelData) {
     if (rawData instanceof Error) {
       logEntry = serializeError(rawData);
     } else {
-      logEntry = data;
+      // TODO: should we clone here? I sort of expected that my data is undisturbed when I call the log function
+      // so it's a bit of a surprised when we sanitize the real object
+      logEntry = _.cloneDeep(rawData);
     }
     // Add reason to the message if provided.
     if (reason) {
