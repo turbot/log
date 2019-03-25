@@ -9,7 +9,7 @@
     "test": "npx mocha"
   },
   "dependencies": {
-    "@turbot/errors": "git+ssh://git@github.com:turbotio/errors.git",
+    "@turbot/errors": "5.0.0-beta.1",
     "@turbot/utils": "git+ssh://git@github.com:turbotio/utils.git",
     "serialize-error": "2.1.0"
   },
