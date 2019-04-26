@@ -2,6 +2,7 @@
   "name": "@turbot/log",
   "author": "Turbot HQ, Inc",
   "version": "5.0.0-alpha.1",
+  "license": "SEE LICENSE IN LICENSE",
   "private": true,
   "main": "index.js",
   "scripts": {
