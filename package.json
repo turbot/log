@@ -1,28 +1,33 @@
 {
   "name": "@turbot/log",
   "author": "Turbot HQ, Inc",
-  "version": "5.0.0-beta.1",
+  "description": "Turbot Log Library",
+  "version": "5.0.0",
   "license": "SEE LICENSE IN LICENSE",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/turbot/log.git"
+  },
   "scripts": {
     "coverage": "npx nyc npm test",
     "test": "npx mocha"
   },
   "dependencies": {
-    "@turbot/errors": "5.0.0-beta.1",
-    "@turbot/utils": "5.0.0-beta.1",
+    "@turbot/errors": "5.0.0",
+    "@turbot/utils": "5.0.0",
     "serialize-error": "2.1.0"
   },
   "devDependencies": {
-    "chai": "4.1.2",
-    "eslint": "5.5.0",
-    "eslint-config-prettier": "3.0.1",
-    "eslint-plugin-prettier": "2.6.2",
-    "eslint-plugin-you-dont-need-lodash-underscore": "6.4.0",
+    "chai": "4.2.0",
+    "eslint": "6.0.1",
+    "eslint-config-prettier": "4.3.0",
+    "eslint-plugin-prettier": "3.1.0",
+    "eslint-plugin-you-dont-need-lodash-underscore": "6.5.0",
     "mocha": "5.2.0",
+    "nyc": "14.1.1",
     "mocha-sinon": "2.1.0",
-    "nyc": "13.0.1",
-    "prettier": "1.14.2",
+    "prettier": "1.18.2",
     "test-console": "1.1.0"
   }
 }
