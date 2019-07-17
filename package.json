@@ -2,7 +2,7 @@
   "name": "@turbot/log",
   "author": "Turbot HQ, Inc",
   "description": "Turbot Log Library",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "license": "SEE LICENSE IN LICENSE",
   "main": "index.js",
   "repository": {
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@turbot/errors": "5.0.0",
-    "@turbot/utils": "5.0.0",
+    "@turbot/utils": "5.0.1",
     "serialize-error": "2.1.0"
   },
   "devDependencies": {
