@@ -14,8 +14,8 @@
     "test": "npx mocha"
   },
   "dependencies": {
-    "@turbot/errors": "5.0.0",
-    "@turbot/utils": "5.0.1",
+    "@turbot/errors": "5.0.4",
+    "@turbot/utils": "5.0.2",
     "serialize-error": "2.1.0"
   },
   "devDependencies": {
