@@ -2,6 +2,10 @@
 
 # Release History
 
+## 5.0.4 [2019-12-27]
+
+- Updated: @turbot/utils to version 5.0.4.
+
 ## 5.0.3 [2019-12-19]
 
 - Updated: license to Apache 2.0.
