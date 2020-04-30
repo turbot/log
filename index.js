@@ -1,5 +1,5 @@
 const _ = require("lodash");
-const serializeError = require("serialize-error");
+const { serializeError } = require("serialize-error");
 const utils = require("@turbot/utils");
 
 /***
@@ -19,14 +19,14 @@ const LEVELS = {
     name: "emergency",
     aliases: ["emerg"],
     severity: "Emergency",
-    description: "Turbot is unavailable and automatic recovery is unlikely."
+    description: "Turbot is unavailable and automatic recovery is unlikely.",
   },
 
   alert: {
     value: 1,
     id: "alert",
     severity: "Alert",
-    description: "Alert from a key component or dependency. Turbot is unusable, but may automatically recover."
+    description: "Alert from a key component or dependency. Turbot is unusable, but may automatically recover.",
   },
 
   critical: {
@@ -34,7 +34,7 @@ const LEVELS = {
     id: "critical",
     aliases: ["crit"],
     severity: "Critical",
-    description: "Critical conditions. Turbot may be unavailable or have severely degraded performance."
+    description: "Critical conditions. Turbot may be unavailable or have severely degraded performance.",
   },
 
   error: {
@@ -42,36 +42,36 @@ const LEVELS = {
     id: "error",
     aliases: ["err"],
     severity: "Error",
-    description: "Error significant to an action, but not critical to Turbot. Review and remediation required."
+    description: "Error significant to an action, but not critical to Turbot. Review and remediation required.",
   },
 
   warning: {
     value: 4,
     id: "warning",
     severity: "Warning",
-    description: "Warning messages. An error may occur if action is not taken. Review recommended."
+    description: "Warning messages. An error may occur if action is not taken. Review recommended.",
   },
 
   notice: {
     value: 5,
     id: "notice",
     severity: "Notice",
-    description: "Significant, but normal, events such as automated actions."
+    description: "Significant, but normal, events such as automated actions.",
   },
 
   info: {
     value: 6,
     id: "info",
     severity: "Informational",
-    description: "Information about decisions and interim data."
+    description: "Information about decisions and interim data.",
   },
 
   debug: {
     value: 7,
     id: "debug",
     severity: "Debug",
-    description: "Debug messages used in development only."
-  }
+    description: "Debug messages used in development only.",
+  },
 };
 
 /**
@@ -82,8 +82,8 @@ const LEVELS = {
  * @param {string} level Logging level, i.e. debug, info, warning, error
  * @param {object} levelData Data to log
  */
-const handler = function(level, levelData) {
-  return function(reason = {}, rawData = {}) {
+const handler = function (level, levelData) {
+  return function (reason = {}, rawData = {}) {
     // Don't log if the message is at a more verbose level than desired.
     // Default to error.
 
@@ -147,7 +147,7 @@ const handler = function(level, levelData) {
     // should always be hidden.
     logEntry = utils.data.sanitize(logEntry, {
       clone: false,
-      breakCircular: true
+      breakCircular: true,
     });
 
     // Turbot only logs messages critical to Turbot to stderr. All others -

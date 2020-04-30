@@ -2,6 +2,11 @@
 
 # Release History
 
+## 5.1.0 [2020-04-30]
+
+- Updated: @turbot/utils to 5.1.0. serialize-error to 6.0.0. Various dev dependencies.
+- Updated: eslint and prettier config to match Turbot's standard.
+
 ## 5.0.5 [2020-02-05]
 
 - Updated: @turbot/utils to version 5.0.6.
