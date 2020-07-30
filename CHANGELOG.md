@@ -2,6 +2,10 @@
 
 # Release History
 
+## 5.2.0 [2020-07-30]
+
+- Updated: @turbot/errors to 5.1.0. #19. @turbot/utils to 5.2.0. #18. Various dev dependencies.
+
 ## 5.1.0 [2020-04-30]
 
 - Updated: @turbot/utils to 5.1.0. serialize-error to 6.0.0. Various dev dependencies.
