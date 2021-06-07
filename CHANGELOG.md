@@ -4,7 +4,7 @@
 
 ## 5.2.0 [2020-07-30]
 
-- Updated: @turbot/errors to 5.2.0. #19. @turbot/utils to 5.3.0. #18. Various dev dependencies.
+- Updated: @turbot/errors to 5.2.0. @turbot/utils to 5.3.0. serialize-error to 8.1.0. Various dev dependencies.
 
 ## 5.1.0 [2020-04-30]
 
