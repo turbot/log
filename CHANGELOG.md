@@ -2,6 +2,10 @@
 
 # Release History
 
+## 5.5.0 [2023-11-20]
+
+- Updated: @turbot/errors to 5.3.0. @turbot/utils to 5.6.0. Various dev dependencies.
+
 ## 5.4.0 [2022-06-22]
 
 - Updated: @turbot/utils to 5.5.0.
